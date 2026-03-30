@@ -9,6 +9,7 @@ public class Patient {
     private int waitMinutes;     // How many minutes the patient has been waiting
     private int priorityScore;   // Calculated score — higher = treated first
     private long arrivalTime;    // System time when patient arrived (for wait time calc)
+    private String status;       // Status: WAITING, IN_TREATMENT, DISCHARGED, REFERRED
 
     // Constructor — called when a new patient is added
     public Patient(String id, String name, int age, int severity, String symptoms) {
@@ -20,10 +21,12 @@ public class Patient {
         this.waitMinutes = 0;
         this.arrivalTime = System.currentTimeMillis(); // record arrival time
         this.priorityScore = calculateScore();         // auto-calculate score
+        this.status = "WAITING";                        // initial status
     }
 
     // Default constructor needed by Spring Boot (for JSON conversion)
-    public Patient() {}
+    public Patient() {
+    }
 
     // -------------------------------------------------------
     // PRIORITY SCORE FORMULA:
@@ -90,6 +93,9 @@ public class Patient {
 
     public long getArrivalTime() { return arrivalTime; }
     public void setArrivalTime(long arrivalTime) { this.arrivalTime = arrivalTime; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
     @Override
     public String toString() {

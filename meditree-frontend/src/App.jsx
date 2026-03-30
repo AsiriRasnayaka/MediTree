@@ -3,6 +3,8 @@ import Dashboard from "./components/Dashboard";
 import AddPatient from "./components/AddPatient";
 import QueueView from "./components/QueueView";
 import AlertPanel from "./components/AlertPanel";
+import SearchView from "./components/SearchView";
+import AdminPanel from "./components/AdminPanel";
 import { getAlerts } from "./services/api";
 import "./App.css";
 
@@ -31,6 +33,8 @@ export default function App() {
     if (page === "add")       return <AddPatient />;
     if (page === "queue")     return <QueueView />;
     if (page === "alerts")    return <AlertPanel />;
+    if (page === "search")    return <SearchView />;
+    if (page === "admin")     return <AdminPanel />;
   }
 
   return (
@@ -63,6 +67,12 @@ export default function App() {
             Queue
           </button>
           <button
+            className={`nav-btn ${page === "search" ? "active" : ""}`}
+            onClick={() => setPage("search")}
+          >
+            Search
+          </button>
+          <button
             className={`nav-btn ${page === "add" ? "active" : ""}`}
             onClick={() => setPage("add")}
           >
@@ -76,6 +86,13 @@ export default function App() {
             {alertCount > 0 && (
               <span className="nav-badge">{alertCount}</span>
             )}
+          </button>
+          <button
+            className={`nav-btn ${page === "admin" ? "active" : ""}`}
+            onClick={() => setPage("admin")}
+            title="Admin - View AVL Tree Visualization"
+          >
+            🔧 AVL Tree
           </button>
         </div>
       </nav>

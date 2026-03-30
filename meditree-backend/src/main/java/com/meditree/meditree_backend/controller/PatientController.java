@@ -118,4 +118,90 @@ public class PatientController {
     public ResponseEntity<PatientService.DashboardStats> getDashboard() {
         return ResponseEntity.ok(patientService.getDashboardStats());
     }
+
+    // -------------------------------------------------------
+    // GET /api/patients/search
+    // Search patients by name or ID (Novelty Feature 4a)
+    // Query param: q=John
+    // -------------------------------------------------------
+    @GetMapping("/patients/search")
+    public ResponseEntity<List<Patient>> searchPatients(
+            @RequestParam(name = "q", defaultValue = "") String query) {
+        if (query.isEmpty()) {
+            return ResponseEntity.ok(patientService.getQueue());
+        }
+        return ResponseEntity.ok(patientService.searchPatients(query));
+    }
+
+    // -------------------------------------------------------
+    // GET /api/patients/filter
+    // Filter patients by status, severity, or both
+    // Query params: status=WAITING, severity=8, minSev=5, maxSev=10
+    // -------------------------------------------------------
+    @GetMapping("/patients/filter")
+    public ResponseEntity<List<Patient>> filterPatients(
+            @RequestParam(name = "status", required = false) String status,
+            @RequestParam(name = "severity", required = false) Integer severity,
+            @RequestParam(name = "minSev", required = false) Integer minSev,
+            @RequestParam(name = "maxSev", required = false) Integer maxSev) {
+
+        List<Patient> result = patientService.getQueue();
+
+        // Filter by status
+        if (status != null && !status.isEmpty()) {
+            result = result.stream()
+                    .filter(p -> p.getStatus().equals(status))
+                    .toList();
+        }
+
+        // Filter by single severity
+        if (severity != null) {
+            result = result.stream()
+                    .filter(p -> p.getSeverity() == severity)
+                    .toList();
+        }
+
+        // Filter by severity range
+        if (minSev != null && maxSev != null) {
+            final int min = minSev;
+            final int max = maxSev;
+            result = result.stream()
+                    .filter(p -> p.getSeverity() >= min && p.getSeverity() <= max)
+                    .toList();
+        }
+
+        return ResponseEntity.ok(result);
+    }
+
+    // -------------------------------------------------------
+    // PUT /api/patients/{id}/status
+    // Update patient status (Novelty Feature 4b)
+    // Status values: WAITING, IN_TREATMENT, DISCHARGED, REFERRED
+    // -------------------------------------------------------
+    @PutMapping("/patients/{id}/status")
+    public ResponseEntity<?> updatePatientStatus(
+            @PathVariable String id,
+            @RequestBody Map<String, String> body) {
+
+        String newStatus = body.get("status");
+        if (newStatus == null || newStatus.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "status is required"));
+        }
+
+        boolean success = patientService.updatePatientStatus(id, newStatus);
+        if (success) {
+            return ResponseEntity.ok(Map.of("message", "Status updated to " + newStatus));
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // -------------------------------------------------------
+    // GET /api/admin/tree
+    // Get AVL tree structure for visualization
+    // -------------------------------------------------------
+    @GetMapping("/admin/tree")
+    public ResponseEntity<?> getTreeStructure() {
+        return ResponseEntity.ok(patientService.getTreeStructure());
+    }
 }

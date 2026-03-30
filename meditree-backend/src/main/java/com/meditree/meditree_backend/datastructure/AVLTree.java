@@ -39,6 +39,7 @@ public class AVLTree {
 
     // -------------------------------------------------------
     // RIGHT ROTATION — fixes Left-Left imbalance
+    // In MAX HEAP, left side has higher scores
     //
     //     y                x
     //    / \              / \
@@ -117,20 +118,22 @@ public class AVLTree {
     }
 
     // -------------------------------------------------------
-    // INSERT — add a new patient into the AVL tree
+    // INSERT — add a new patient into the AVL tree (Max Heap)
+    // Max Priority Score = Root (highest priority patient on top)
     // -------------------------------------------------------
     private AVLNode insert(AVLNode node, Patient patient) {
         // Step 1: Normal BST insert (find the right empty spot)
         if (node == null) return new AVLNode(patient);
 
-        if (patient.getPriorityScore() < node.patient.getPriorityScore()) {
-            node.left = insert(node.left, patient);   // go left for lower score
-        } else if (patient.getPriorityScore() > node.patient.getPriorityScore()) {
-            node.right = insert(node.right, patient); // go right for higher score
+        // FOR MAX HEAP: Insert to left if score is greater, right if smaller
+        if (patient.getPriorityScore() > node.patient.getPriorityScore()) {
+            node.left = insert(node.left, patient);   // go left for higher score (max heap)
+        } else if (patient.getPriorityScore() < node.patient.getPriorityScore()) {
+            node.right = insert(node.right, patient); // go right for lower score
         } else {
             // Same score — add tiny offset to avoid duplicates
             patient.setPriorityScore(patient.getPriorityScore() + 1);
-            node.right = insert(node.right, patient);
+            node.left = insert(node.left, patient);
         }
 
         // Step 2: Rebalance after insert
@@ -189,35 +192,32 @@ public class AVLTree {
 
     // -------------------------------------------------------
     // TREAT NEXT — removes and returns the highest priority patient
-    // Highest priority = highest score = rightmost node
+    // In MAX HEAP: Highest priority = ROOT NODE
     // -------------------------------------------------------
     public Patient treatNextPatient() {
         if (root == null) return null;
 
-        // Find rightmost node (highest score)
-        AVLNode current = root;
-        while (current.right != null) current = current.right;
-
-        Patient next = current.patient;
-        delete(next.getPriorityScore()); // remove from tree
+        Patient next = root.patient;
+        delete(root.patient.getPriorityScore()); // remove from tree
         return next;
     }
 
     // -------------------------------------------------------
     // GET SORTED QUEUE — returns all patients sorted highest first
-    // Uses REVERSE in-order traversal: right → root → left
+    // In MAX HEAP: In-order traversal: left → root → right
+    // (Left subtree has higher scores, right subtree has lower scores)
     // -------------------------------------------------------
     public List<Patient> getSortedQueue() {
         List<Patient> queue = new ArrayList<>();
-        reverseInOrder(root, queue);
+        inOrderTraversal(root, queue);
         return queue;
     }
 
-    private void reverseInOrder(AVLNode node, List<Patient> list) {
+    private void inOrderTraversal(AVLNode node, List<Patient> list) {
         if (node == null) return;
-        reverseInOrder(node.right, list); // visit higher scores first
+        inOrderTraversal(node.left, list);  // visit higher scores first (left subtree)
         list.add(node.patient);
-        reverseInOrder(node.left, list);
+        inOrderTraversal(node.right, list); // visit lower scores last (right subtree)
     }
 
     // -------------------------------------------------------
@@ -266,13 +266,15 @@ public class AVLTree {
 
     private int countPatientsAhead(AVLNode node, int score) {
         if (node == null) return 0;
+        
+        // In MAX HEAP: Left subtree has higher scores, right subtree has lower scores
         if (node.patient.getPriorityScore() > score) {
             // This node is ahead + check both sides
             return 1 + countPatientsAhead(node.left, score)
                     + countPatientsAhead(node.right, score);
         } else {
-            // Only right side can have higher scores
-            return countPatientsAhead(node.right, score);
+            // Only left side can have higher scores (max heap property)
+            return countPatientsAhead(node.left, score);
         }
     }
 
@@ -329,5 +331,48 @@ public class AVLTree {
     // Get tree height (for visualization)
     public int getTreeHeight() {
         return height(root);
+    }
+
+    // -------------------------------------------------------
+    // VISUALIZE TREE (For Admin Panel)
+    // Converts AVL tree to JSON-friendly structure for visualization
+    // -------------------------------------------------------
+    public TreeNode getTreeStructure() {
+        return convertToTreeNode(root);
+    }
+
+    private TreeNode convertToTreeNode(AVLNode node) {
+        if (node == null) return null;
+
+        TreeNode treeNode = new TreeNode();
+        treeNode.id = node.patient.getId();
+        treeNode.name = node.patient.getName();
+        treeNode.score = node.patient.getPriorityScore();
+        treeNode.severity = node.patient.getSeverity();
+        treeNode.status = node.patient.getStatus();
+        treeNode.height = node.height;
+
+        if (node.left != null) {
+            treeNode.left = convertToTreeNode(node.left);
+        }
+        if (node.right != null) {
+            treeNode.right = convertToTreeNode(node.right);
+        }
+
+        return treeNode;
+    }
+
+    // -------------------------------------------------------
+    // TreeNode - For visualization
+    // -------------------------------------------------------
+    public static class TreeNode {
+        public String id;
+        public String name;
+        public int score;
+        public int severity;
+        public String status;
+        public int height;
+        public TreeNode left;
+        public TreeNode right;
     }
 }

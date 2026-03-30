@@ -29,3 +29,22 @@ export const getWaitTime = (id) => API.get(`/patients/${id}/wait-time`);
 
 // Get all alerts (Novelty Feature 3)
 export const getAlerts = () => API.get('/alerts');
+
+// Search patients by name/ID (Feature 1)
+export const searchPatients = (query) => 
+  API.get('/patients/search', { params: { q: query } });
+
+// Filter patients (Feature 1)
+export const filterPatients = (params) => 
+  API.get('/patients/filter', { params });
+
+// Update patient status (Feature 2)
+export const updatePatientStatus = (id, status) =>
+  API.put(`/patients/${id}/status`, { status });
+
+// Add treatment log (Feature 3)
+export const addTreatmentLog = (id, treatment, notes) =>
+  API.post(`/patients/${id}/treatment`, { treatment, notes });
+
+// Get AVL tree structure for visualization (Admin feature)
+export const getTreeStructure = () => API.get('/admin/tree');

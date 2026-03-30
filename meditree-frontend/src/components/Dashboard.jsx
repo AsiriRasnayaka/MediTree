@@ -97,6 +97,36 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Status Breakdown (Feature 4 - Advanced Analytics) */}
+      <h3 className="section-title">Patient Status Breakdown</h3>
+      <div className="breakdown-grid">
+        <div className="breakdown-card critical">
+          <div className="breakdown-label">In Treatment</div>
+          <div className="breakdown-num">{stats?.inTreatment ?? 0}</div>
+        </div>
+        <div className="breakdown-card moderate">
+          <div className="breakdown-label">Waiting</div>
+          <div className="breakdown-num">{stats?.waiting ?? 0}</div>
+        </div>
+        <div className="breakdown-card minor">
+          <div className="breakdown-label">Discharged</div>
+          <div className="breakdown-num">{stats?.discharged ?? 0}</div>
+        </div>
+      </div>
+
+      {/* Wait Time Analytics (Feature 4 - Advanced Analytics) */}
+      <h3 className="section-title">Wait Time Analysis</h3>
+      <div className="breakdown-grid">
+        <div className="breakdown-card moderate">
+          <div className="breakdown-label">Avg Wait (All)</div>
+          <div className="breakdown-num">{Math.round(stats?.avgWaitMinutes ?? 0)}m</div>
+        </div>
+        <div className="breakdown-card critical">
+          <div className="breakdown-label">Avg Wait (Critical)</div>
+          <div className="breakdown-num">{Math.round(stats?.avgWaitCritical ?? 0)}m</div>
+        </div>
+      </div>
+
       {/* Next Patient */}
       <h3 className="section-title">Next Patient to Treat</h3>
       {nextPatient ? (
